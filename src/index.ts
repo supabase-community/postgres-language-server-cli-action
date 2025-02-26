@@ -3,25 +3,16 @@ import * as toolCache from '@actions/tool-cache'
 import { exec } from 'node:child_process'
 import { promisify } from 'node:util'
 import os from 'node:os'
+import path from 'node:path'
+import { mkdir, symlink, chmod } from 'fs/promises'
+import { existsSync } from 'fs'
 
 const doExec = promisify(exec)
 
-main().then(() => process.exit(0))
-async function main() {
-  try {
-    const version = core.getInput('version', { required: true })
-
-    const url = getDownloadUrl(version)
-    const tool = await toolCache.downloadTool(url)
-    core.addPath(tool)
-
-    const installedVersion = await determineInstalledVersion()
-    core.setOutput('installed-version', installedVersion)
-  } catch (err) {
-    if (err instanceof Error) {
-      core.setFailed(err.message)
-    }
-  }
+const platformMappings = {
+  darwin: 'darwin',
+  linux: 'unknown-linux-gnu',
+  win32: 'pc-windows-msvc'
 }
 
 const archMappings = {
@@ -43,12 +34,6 @@ function getArch() {
   )
 }
 
-const platformMappings = {
-  darwin: 'darwin',
-  linux: 'linux-gnu',
-  win32: 'windows-msvc'
-}
-
 function getPlatform() {
   const platform = os.platform()
   for (const [nodePlatform, rustPlatform] of Object.entries(platformMappings)) {
@@ -67,7 +52,7 @@ function getFileName(): string {
   const platform = getPlatform()
   const arch = getArch()
 
-  return `plgt_${arch}-${platform}`
+  return `pglt_${arch}-${platform}`
 }
 
 function getDownloadUrl(version: string): string {
@@ -81,7 +66,7 @@ function getDownloadUrl(version: string): string {
 }
 
 async function determineInstalledVersion(): Promise<string> {
-  const { stdout } = await doExec('pglt --version')
+  const { stdout } = await doExec(`pglt --version`)
 
   const version = stdout.trim()
   if (!version) {
@@ -90,3 +75,39 @@ async function determineInstalledVersion(): Promise<string> {
 
   return version
 }
+
+async function main() {
+  try {
+    const version = core.getInput('version', { required: true })
+
+    const url = getDownloadUrl(version)
+
+    const tool = await toolCache.downloadTool(url)
+
+    await chmod(tool, '755')
+
+    const binDir = path.join(process.env.HOME!, 'bin')
+    if (!existsSync(binDir)) {
+      core.info(`Binary dir not found. Creating one at ${binDir}`)
+      await mkdir(binDir, { recursive: true })
+    }
+
+    const symlinkPath = path.join(binDir, 'pglt')
+    await symlink(tool, symlinkPath)
+
+    core.info(`Adding to path: ${binDir}`)
+    core.addPath(binDir)
+
+    /**
+     * TODO: GH Runner still won't find the `pglt` binary
+     * The `tool` binary path works, however – seems to be something with symlink?
+     */
+    const installedVersion = await determineInstalledVersion()
+    core.setOutput('installed-version', installedVersion)
+  } catch (err) {
+    if (err instanceof Error) {
+      core.setFailed(err.message)
+    }
+  }
+}
+main().then(() => process.exit(0))

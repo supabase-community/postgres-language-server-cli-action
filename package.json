@@ -1,23 +1,49 @@
 {
-  "name": "postgres_lsp_gh_action",
-  "version": "1.0.0",
-  "main": "index.js",
+  "name": "pglt-github-action",
+  "version": "0.0.1",
+  "description": "Installs the PGLT Cli on your Github Action Runner.",
+  "main": "dist/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "ncc build --source-map --license license.txt src/index.ts -o dist",
+    "format": "prettier --write '**/*.ts'",
+    "format:check": "prettier --check '**/*.ts'",
+    "lint": "eslint src/**/*.ts"
   },
   "engines": {
     "node": ">=20.5 <23"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "actions",
+    "node",
+    "setup",
+    "postgres",
+    "sql",
+    "lsp",
+    "pglt"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "TODO"
+  },
+  "author": "Supabase Community",
+  "contributors": [
+    {
+      "name": "Philipp Steinrötter",
+      "url": "https://github.com/psteinroe"
+    },
+    {
+      "name": "Julian Domke",
+      "url": "https://github.com/juleswritescode"
+    }
+  ],
   "license": "ISC",
-  "description": "",
+  "dependencies": {
+    "@actions/core": "1.11.1",
+    "@actions/tool-cache": "2.0.2",
+    "@vercel/ncc": "0.38.3"
+  },
   "devDependencies": {
     "@types/node": "22.13.5",
     "typescript": "5.7.3"
-  },
-  "dependencies": {
-    "@actions/core": "1.11.1",
-    "@actions/tool-cache": "2.0.2"
   }
 }
