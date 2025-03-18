@@ -52,7 +52,7 @@ function getFileName(): string {
   const platform = getPlatform()
   const arch = getArch()
 
-  return `pglt_${arch}-${platform}`
+  return `postgrestools_${arch}-${platform}`
 }
 
 function getDownloadUrl(version: string): string {
@@ -66,11 +66,11 @@ function getDownloadUrl(version: string): string {
 }
 
 async function determineInstalledVersion(): Promise<string> {
-  const { stdout } = await doExec(`pglt --version`)
+  const { stdout } = await doExec(`postgrestools --version`)
 
   const version = stdout.trim()
   if (!version) {
-    throw new Error('Could not determine installed PGLT version')
+    throw new Error('Could not determine installed PostgresTools version')
   }
 
   return version
@@ -92,14 +92,14 @@ async function main() {
       await mkdir(binDir, { recursive: true })
     }
 
-    const symlinkPath = path.join(binDir, 'pglt')
+    const symlinkPath = path.join(binDir, 'postgrestools')
     await symlink(tool, symlinkPath)
 
     core.info(`Adding to path: ${binDir}`)
     core.addPath(binDir)
 
     /**
-     * TODO: GH Runner still won't find the `pglt` binary
+     * TODO: GH Runner still won't find the `postgrestools` binary
      * The `tool` binary path works, however – seems to be something with symlink?
      */
     const installedVersion = await determineInstalledVersion()

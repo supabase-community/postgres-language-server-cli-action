@@ -1,5 +1,5 @@
-name: PGLT Cli Action
-description: Setup PGLT on Github Actions Runners
+name: PostgresTools Cli Action
+description: Setup PostgresTools on Github Actions Runners
 author: Supabase-Community
 inputs:
   version:

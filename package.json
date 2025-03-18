@@ -1,7 +1,7 @@
 {
-  "name": "pglt-github-action",
+  "name": "postgrestools-cli-action",
   "version": "0.0.1",
-  "description": "Installs the PGLT Cli on your Github Action Runner.",
+  "description": "Installs the PostgresTools Cli on your Github Action Runner.",
   "main": "dist/index.js",
   "scripts": {
     "build": "ncc build --source-map --license license.txt src/index.ts -o dist",
@@ -19,11 +19,11 @@
     "postgres",
     "sql",
     "lsp",
-    "pglt"
+    "postgrestools"
   ],
   "repository": {
     "type": "git",
-    "url": "TODO"
+    "url": "git+https://github.com/supabase-community/pglt-cli-action.git"
   },
   "author": "Supabase Community",
   "contributors": [
