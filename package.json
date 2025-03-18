@@ -23,7 +23,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/supabase-community/pglt-cli-action"
+    "url": "git+https://github.com/supabase-community/pglt-cli-action.git"
   },
   "author": "Supabase Community",
   "contributors": [
