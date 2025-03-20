@@ -1,5 +1,5 @@
 name: PostgresTools Cli Action
-description: Setup PostgresTools on Github Actions Runners
+description: Setup PostgresTools on Github Action Runners
 author: Supabase-Community
 inputs:
   version:
