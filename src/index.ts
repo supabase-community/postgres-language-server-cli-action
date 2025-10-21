@@ -65,7 +65,7 @@ function getFileName(binary: string): string {
 }
 
 function getDownloadUrl(version: string, binary: string): string {
-  let filename = getFileName(binary)
+  const filename = getFileName(binary)
 
   if (version.toLowerCase() === 'latest') {
     return `https://github.com/supabase-community/postgres-language-server/releases/latest/download/${filename}`
