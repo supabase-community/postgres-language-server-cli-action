@@ -1,49 +1,41 @@
 {
-  "name": "postgrestools-cli-action",
-  "version": "0.0.1",
-  "description": "Installs the PostgresTools Cli on your Github Action Runner.",
-  "main": "dist/index.js",
-  "scripts": {
-    "build": "ncc build --source-map --license license.txt src/index.ts -o dist",
-    "format": "prettier --write '**/*.ts'",
-    "format:check": "prettier --check '**/*.ts'",
-    "lint": "eslint src/**/*.ts"
-  },
-  "engines": {
-    "node": ">=20.5 <23"
-  },
-  "keywords": [
-    "actions",
-    "node",
-    "setup",
-    "postgres",
-    "sql",
-    "lsp",
-    "postgrestools"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/supabase-community/pglt-cli-action.git"
-  },
-  "author": "Supabase Community",
-  "contributors": [
-    {
-      "name": "Philipp Steinrötter",
-      "url": "https://github.com/psteinroe"
-    },
-    {
-      "name": "Julian Domke",
-      "url": "https://github.com/juleswritescode"
-    }
-  ],
-  "license": "ISC",
-  "dependencies": {
-    "@actions/core": "1.11.1",
-    "@actions/tool-cache": "2.0.2",
-    "@vercel/ncc": "0.38.3"
-  },
-  "devDependencies": {
-    "@types/node": "22.13.5",
-    "typescript": "5.7.3"
-  }
+	"name": "postgrestools-cli-action",
+	"version": "0.0.1",
+	"description": "Installs the PostgresTools Cli on your Github Action Runner.",
+	"main": "dist/index.js",
+	"scripts": {
+		"build": "ncc build --source-map --license license.txt src/index.ts -o dist",
+		"format": "prettier --write '**/*.ts'",
+		"format:check": "prettier --check '**/*.ts'",
+		"lint": "eslint src/**/*.ts"
+	},
+	"engines": {
+		"node": ">=20.5 <23"
+	},
+	"keywords": ["actions", "node", "setup", "postgres", "sql", "lsp"],
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/supabase-community/pglt-cli-action.git"
+	},
+	"author": "Supabase Community",
+	"contributors": [
+		{
+			"name": "Philipp Steinrötter",
+			"url": "https://github.com/psteinroe"
+		},
+		{
+			"name": "Julian Domke",
+			"url": "https://github.com/juleswritescode"
+		}
+	],
+	"license": "ISC",
+	"dependencies": {
+		"@actions/core": "1.11.1",
+		"@actions/tool-cache": "2.0.2",
+		"@vercel/ncc": "0.38.3"
+	},
+	"devDependencies": {
+		"@types/node": "22.13.5",
+		"typescript": "5.7.3"
+	}
 }

@@ -1,5 +1,5 @@
-name: PostgresTools Cli Action
-description: Setup PostgresTools on Github Action Runners
+name: Postgres Language Server CLI Action
+description: Setup Postgres Language Server on Github Action Runners
 author: Supabase-Community
 inputs:
   version:
