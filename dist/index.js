@@ -28300,7 +28300,7 @@ function getFileName(binary) {
     return `${binary}_${arch}-${platform}`;
 }
 function getDownloadUrl(version, binary) {
-    let filename = getFileName(binary);
+    const filename = getFileName(binary);
     if (version.toLowerCase() === 'latest') {
         return `https://github.com/supabase-community/postgres-language-server/releases/latest/download/${filename}`;
     }
