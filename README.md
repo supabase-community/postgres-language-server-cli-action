@@ -1,4 +1,4 @@
-# PostgresTools GitHub Action
+# Postgres Language Server GitHub Action
 
 This is a simple action that will install the [Postgres Language Server](https://github.com/supabase-community/postgres-language-server) on your runner. It will install the appropriate binary for your machine.
 
