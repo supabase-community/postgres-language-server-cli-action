@@ -20,6 +20,15 @@ const archMappings = {
   x64: 'x86_64'
 }
 
+async function urlExists(url: string): Promise<boolean> {
+  try {
+    const response = await fetch(url, { method: 'HEAD' })
+    return response.ok
+  } catch {
+    return false
+  }
+}
+
 function getArch() {
   const arch = os.arch()
   for (const [nodeArch, rustArch] of Object.entries(archMappings)) {
@@ -48,20 +57,20 @@ function getPlatform() {
   )
 }
 
-function getFileName(): string {
+function getFileName(binary: string): string {
   const platform = getPlatform()
   const arch = getArch()
 
-  return `postgrestools_${arch}-${platform}`
+  return `${binary}_${arch}-${platform}`
 }
 
-function getDownloadUrl(version: string): string {
-  const filename = getFileName()
+function getDownloadUrl(version: string, binary: string): string {
+  const filename = getFileName(binary)
 
   if (version.toLowerCase() === 'latest') {
-    return `https://github.com/supabase-community/postgres_lsp/releases/latest/download/${filename}`
+    return `https://github.com/supabase-community/postgres-language-server/releases/latest/download/${filename}`
   } else {
-    return `https://github.com/supabase-community/postgres_lsp/releases/download/${version}/${filename}`
+    return `https://github.com/supabase-community/postgres-language-server/releases/download/${version}/${filename}`
   }
 }
 
@@ -80,7 +89,10 @@ async function main() {
   try {
     const version = core.getInput('version', { required: true })
 
-    const url = getDownloadUrl(version)
+    let url = getDownloadUrl(version, 'postgres-language-server')
+    if (!(await urlExists(url))) {
+      url = getDownloadUrl(version, 'postgrestools')
+    }
 
     const tool = await toolCache.downloadTool(url)
 
@@ -107,6 +119,8 @@ async function main() {
   } catch (err) {
     if (err instanceof Error) {
       core.setFailed(err.message)
+    } else {
+      core.setFailed('An unknown error occurred')
     }
   }
 }
