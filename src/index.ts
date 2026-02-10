@@ -4,10 +4,13 @@ import { exec } from 'node:child_process'
 import { promisify } from 'node:util'
 import os from 'node:os'
 import path from 'node:path'
-import { mkdir, symlink, chmod } from 'fs/promises'
+import { chmod, mkdir, rm, symlink } from 'fs/promises'
 import { existsSync } from 'fs'
 
 const doExec = promisify(exec)
+
+const currentBinaryName = 'postgres-language-server'
+const legacyBinaryName = 'postgrestools'
 
 const platformMappings = {
   darwin: 'darwin',
@@ -75,23 +78,33 @@ function getDownloadUrl(version: string, binary: string): string {
 }
 
 async function determineInstalledVersion(): Promise<string> {
-  const { stdout } = await doExec(`postgrestools --version`)
+  const binaries = [currentBinaryName, legacyBinaryName]
 
-  const version = stdout.trim()
-  if (!version) {
-    throw new Error('Could not determine installed PostgresTools version')
+  for (const binary of binaries) {
+    try {
+      const { stdout } = await doExec(`${binary} --version`)
+      const version = stdout.trim()
+
+      if (version) {
+        return version
+      }
+    } catch {
+      continue
+    }
   }
 
-  return version
+  throw new Error(
+    'Could not determine installed Postgres Language Server version'
+  )
 }
 
 async function main() {
   try {
     const version = core.getInput('version', { required: true })
 
-    let url = getDownloadUrl(version, 'postgres-language-server')
+    let url = getDownloadUrl(version, currentBinaryName)
     if (!(await urlExists(url))) {
-      url = getDownloadUrl(version, 'postgrestools')
+      url = getDownloadUrl(version, legacyBinaryName)
     }
 
     const tool = await toolCache.downloadTool(url)
@@ -104,16 +117,17 @@ async function main() {
       await mkdir(binDir, { recursive: true })
     }
 
-    const symlinkPath = path.join(binDir, 'postgrestools')
-    await symlink(tool, symlinkPath)
+    const binarySymlinkPath = path.join(binDir, currentBinaryName)
+    await rm(binarySymlinkPath, { force: true })
+    await symlink(tool, binarySymlinkPath)
+
+    const legacySymlinkPath = path.join(binDir, legacyBinaryName)
+    await rm(legacySymlinkPath, { force: true })
+    await symlink(tool, legacySymlinkPath)
 
     core.info(`Adding to path: ${binDir}`)
     core.addPath(binDir)
 
-    /**
-     * TODO: GH Runner still won't find the `postgrestools` binary
-     * The `tool` binary path works, however – seems to be something with symlink?
-     */
     const installedVersion = await determineInstalledVersion()
     core.setOutput('installed-version', installedVersion)
   } catch (err) {

@@ -1,7 +1,7 @@
 {
-	"name": "postgrestools-cli-action",
+	"name": "postgres-language-server-cli-action",
 	"version": "0.0.1",
-	"description": "Installs the PostgresTools Cli on your Github Action Runner.",
+	"description": "Installs the Postgres Language Server CLI on your GitHub Actions runner.",
 	"main": "dist/index.js",
 	"scripts": {
 		"build": "ncc build --source-map --license license.txt src/index.ts -o dist",
@@ -15,7 +15,7 @@
 	"keywords": ["actions", "node", "setup", "postgres", "sql", "lsp"],
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/supabase-community/pglt-cli-action.git"
+		"url": "git+https://github.com/supabase-community/postgres-language-server-cli-action.git"
 	},
 	"author": "Supabase Community",
 	"contributors": [

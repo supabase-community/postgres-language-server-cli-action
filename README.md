@@ -3,10 +3,13 @@
 This is a simple action that will install the [Postgres Language Server](https://github.com/supabase-community/postgres-language-server) on your runner. It will install the appropriate binary for your machine.
 
 It has a single input: `version: latest | <semver>`.
-Use `latest` if you want to use the latest available PostgresTools version in your runner.
+Use `latest` if you want to use the latest available Postgres Language Server version in your runner.
 Use a specific tag, such as `0.16.0`, if you want to use a specific version.
 
 Whatever version is used will be output as `outputs.installed-version`.
+
+The action installs `postgres-language-server` and also provides
+`postgrestools` as a compatibility alias.
 
 ## Example Usage
 

@@ -28256,6 +28256,8 @@ const node_path_1 = __importDefault(__nccwpck_require__(6760));
 const promises_1 = __nccwpck_require__(1943);
 const fs_1 = __nccwpck_require__(9896);
 const doExec = (0, node_util_1.promisify)(node_child_process_1.exec);
+const currentBinaryName = 'postgres-language-server';
+const legacyBinaryName = 'postgrestools';
 const platformMappings = {
     darwin: 'darwin',
     linux: 'unknown-linux-gnu',
@@ -28310,21 +28312,29 @@ function getDownloadUrl(version, binary) {
 }
 function determineInstalledVersion() {
     return __awaiter(this, void 0, void 0, function* () {
-        const { stdout } = yield doExec(`postgrestools --version`);
-        const version = stdout.trim();
-        if (!version) {
-            throw new Error('Could not determine installed PostgresTools version');
+        const binaries = [currentBinaryName, legacyBinaryName];
+        for (const binary of binaries) {
+            try {
+                const { stdout } = yield doExec(`${binary} --version`);
+                const version = stdout.trim();
+                if (version) {
+                    return version;
+                }
+            }
+            catch (_a) {
+                continue;
+            }
         }
-        return version;
+        throw new Error('Could not determine installed Postgres Language Server version');
     });
 }
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const version = core.getInput('version', { required: true });
-            let url = getDownloadUrl(version, 'postgres-language-server');
+            let url = getDownloadUrl(version, currentBinaryName);
             if (!(yield urlExists(url))) {
-                url = getDownloadUrl(version, 'postgrestools');
+                url = getDownloadUrl(version, legacyBinaryName);
             }
             const tool = yield toolCache.downloadTool(url);
             yield (0, promises_1.chmod)(tool, '755');
@@ -28333,14 +28343,14 @@ function main() {
                 core.info(`Binary dir not found. Creating one at ${binDir}`);
                 yield (0, promises_1.mkdir)(binDir, { recursive: true });
             }
-            const symlinkPath = node_path_1.default.join(binDir, 'postgrestools');
-            yield (0, promises_1.symlink)(tool, symlinkPath);
+            const binarySymlinkPath = node_path_1.default.join(binDir, currentBinaryName);
+            yield (0, promises_1.rm)(binarySymlinkPath, { force: true });
+            yield (0, promises_1.symlink)(tool, binarySymlinkPath);
+            const legacySymlinkPath = node_path_1.default.join(binDir, legacyBinaryName);
+            yield (0, promises_1.rm)(legacySymlinkPath, { force: true });
+            yield (0, promises_1.symlink)(tool, legacySymlinkPath);
             core.info(`Adding to path: ${binDir}`);
             core.addPath(binDir);
-            /**
-             * TODO: GH Runner still won't find the `postgrestools` binary
-             * The `tool` binary path works, however – seems to be something with symlink?
-             */
             const installedVersion = yield determineInstalledVersion();
             core.setOutput('installed-version', installedVersion);
         }

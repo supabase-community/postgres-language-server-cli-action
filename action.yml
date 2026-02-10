@@ -1,5 +1,5 @@
 name: Postgres Language Server CLI Action
-description: Setup Postgres Language Server on Github Action Runners
+description: Setup Postgres Language Server on GitHub Actions runners
 author: Supabase-Community
 inputs:
   version:
@@ -7,7 +7,7 @@ inputs:
     required: true
 outputs:
   installed-version:
-    description: Version that of the CLI that was installed on your runner.
+    description: Version of the CLI installed on your runner.
 runs:
   using: node20
   main: dist/index.js
