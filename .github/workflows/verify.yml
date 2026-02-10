@@ -15,4 +15,4 @@ jobs:
       - uses: ./
         with:
           version: ${{ inputs.version }}
-      - run: postgrestools check --skip-db test.sql
+      - run: postgres-language-server check --skip-db test.sql
