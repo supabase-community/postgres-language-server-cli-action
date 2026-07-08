@@ -4,10 +4,13 @@ import { exec } from 'node:child_process'
 import { promisify } from 'node:util'
 import os from 'node:os'
 import path from 'node:path'
-import { mkdir, symlink, chmod } from 'fs/promises'
+import { chmod, mkdir, rm, symlink } from 'fs/promises'
 import { existsSync } from 'fs'
 
 const doExec = promisify(exec)
+
+const currentBinaryName = 'postgres-language-server'
+const legacyBinaryName = 'postgrestools'
 
 const platformMappings = {
   darwin: 'darwin',
@@ -18,6 +21,15 @@ const platformMappings = {
 const archMappings = {
   arm64: 'aarch64',
   x64: 'x86_64'
+}
+
+async function urlExists(url: string): Promise<boolean> {
+  try {
+    const response = await fetch(url, { method: 'HEAD' })
+    return response.ok
+  } catch {
+    return false
+  }
 }
 
 function getArch() {
@@ -48,39 +60,52 @@ function getPlatform() {
   )
 }
 
-function getFileName(): string {
+function getFileName(binary: string): string {
   const platform = getPlatform()
   const arch = getArch()
 
-  return `postgrestools_${arch}-${platform}`
+  return `${binary}_${arch}-${platform}`
 }
 
-function getDownloadUrl(version: string): string {
-  const filename = getFileName()
+function getDownloadUrl(version: string, binary: string): string {
+  const filename = getFileName(binary)
 
   if (version.toLowerCase() === 'latest') {
-    return `https://github.com/supabase-community/postgres_lsp/releases/latest/download/${filename}`
+    return `https://github.com/supabase-community/postgres-language-server/releases/latest/download/${filename}`
   } else {
-    return `https://github.com/supabase-community/postgres_lsp/releases/download/${version}/${filename}`
+    return `https://github.com/supabase-community/postgres-language-server/releases/download/${version}/${filename}`
   }
 }
 
 async function determineInstalledVersion(): Promise<string> {
-  const { stdout } = await doExec(`postgrestools --version`)
+  const binaries = [currentBinaryName, legacyBinaryName]
 
-  const version = stdout.trim()
-  if (!version) {
-    throw new Error('Could not determine installed PostgresTools version')
+  for (const binary of binaries) {
+    try {
+      const { stdout } = await doExec(`${binary} --version`)
+      const version = stdout.trim()
+
+      if (version) {
+        return version
+      }
+    } catch {
+      continue
+    }
   }
 
-  return version
+  throw new Error(
+    'Could not determine installed Postgres Language Server version'
+  )
 }
 
 async function main() {
   try {
     const version = core.getInput('version', { required: true })
 
-    const url = getDownloadUrl(version)
+    let url = getDownloadUrl(version, currentBinaryName)
+    if (!(await urlExists(url))) {
+      url = getDownloadUrl(version, legacyBinaryName)
+    }
 
     const tool = await toolCache.downloadTool(url)
 
@@ -92,21 +117,24 @@ async function main() {
       await mkdir(binDir, { recursive: true })
     }
 
-    const symlinkPath = path.join(binDir, 'postgrestools')
-    await symlink(tool, symlinkPath)
+    const binarySymlinkPath = path.join(binDir, currentBinaryName)
+    await rm(binarySymlinkPath, { force: true })
+    await symlink(tool, binarySymlinkPath)
+
+    const legacySymlinkPath = path.join(binDir, legacyBinaryName)
+    await rm(legacySymlinkPath, { force: true })
+    await symlink(tool, legacySymlinkPath)
 
     core.info(`Adding to path: ${binDir}`)
     core.addPath(binDir)
 
-    /**
-     * TODO: GH Runner still won't find the `postgrestools` binary
-     * The `tool` binary path works, however – seems to be something with symlink?
-     */
     const installedVersion = await determineInstalledVersion()
     core.setOutput('installed-version', installedVersion)
   } catch (err) {
     if (err instanceof Error) {
       core.setFailed(err.message)
+    } else {
+      core.setFailed('An unknown error occurred')
     }
   }
 }
