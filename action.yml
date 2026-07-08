@@ -9,5 +9,5 @@ outputs:
   installed-version:
     description: Version of the CLI installed on your runner.
 runs:
-  using: node20
+  using: node24
   main: dist/index.js
